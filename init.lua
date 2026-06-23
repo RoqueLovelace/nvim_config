@@ -169,7 +169,32 @@ require("lazy").setup({
     end
   }
 
-})
+}),
+
+-- [ H ] PESTAÑAS (Bufferline para ver los archivos abiertos)
+  {
+    "akinsho/bufferline.nvim",
+    version = "*",
+    dependencies = "nvim-tree/nvim-web-devicons",
+    config = function()
+      require("bufferline").setup({
+        options = {
+          -- Estilo visual de las pestañas
+          separator_style = "slant", -- Pone los bordes inclinados tipo navegador moderno
+          diagnostics = "nvim_lsp",  -- Muestra un iconito rojo en la pestaña si ese archivo tiene un error
+          show_buffer_close_icons = false,
+          show_close_icon = false,
+        }
+      })
+
+      -- Atajos de teclado para navegar entre pestañas
+      -- <S-h> significa Shift + h (Moverse a la izquierda)
+      -- <S-l> significa Shift + l (Moverse a la derecha)
+      vim.keymap.set('n', '<S-h>', '<Cmd>BufferLineCyclePrev<CR>', { desc = "Pestaña anterior" })
+      vim.keymap.set('n', '<S-l>', '<Cmd>BufferLineCycleNext<CR>', { desc = "Pestaña siguiente" })
+      vim.keymap.set('n', '<leader>x', '<Cmd>bdelete<CR>', { desc = "Cerrar pestaña actual" })
+    end
+  }
 
 -- ==========================================
 -- 4. REGLAS ABSOLUTAS (Sobrescribir estándares)
