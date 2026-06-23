@@ -2,7 +2,7 @@
 -- 1. CONFIGURACIÓN BASE Y TECLA LÍDER
 -- ==========================================
 vim.g.mapleader = " "
-
+vim.opt.clipboard = "unnamedplus" -- Sincronizar el portapapeles de Neovim con Windows
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.tabstop = 2         -- El ancho visual de un tabulador ahora es de 2 espacios
