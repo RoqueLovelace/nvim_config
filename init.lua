@@ -5,9 +5,9 @@ vim.g.mapleader = " "
 
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.tabstop = 4
-vim.opt.shiftwidth = 4
-vim.opt.expandtab = true
+vim.opt.tabstop = 2         -- El ancho visual de un tabulador ahora es de 2 espacios
+vim.opt.shiftwidth = 2      -- El ancho de la sangría (indentación) cambia a 2 espacios
+vim.opt.expandtab = true    -- Transforma los tabs físicos en espacios reales
 
 -- ==========================================
 -- 2. INSTALADOR DEL GESTOR (lazy.nvim)
