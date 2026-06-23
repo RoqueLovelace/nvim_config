@@ -192,6 +192,23 @@ require("lazy").setup({
       vim.keymap.set('n', '<S-l>', '<Cmd>BufferLineCycleNext<CR>', { desc = "Pestaña siguiente" })
       vim.keymap.set('n', '<leader>x', '<Cmd>bdelete<CR>', { desc = "Cerrar pestaña actual" })
     end
+  },
+  
+  -- [ I ] BARRA DE ESTADO (Para ver Git, modos y líneas)
+  {
+    "nvim-lualine/lualine.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("lualine").setup({
+        options = {
+          -- Le decimos que use los colores de tu tema actual
+          theme = "tokyonight", 
+          -- Estilos de los separadores
+          component_separators = { left = '│', right = '│'},
+          section_separators = { left = '', right = ''},
+        },
+      })
+    end
   }
 
 })
