@@ -167,11 +167,9 @@ require("lazy").setup({
         })
       })
     end
-  }
+  },
 
-}),
-
--- [ H ] PESTAÑAS (Bufferline para ver los archivos abiertos)
+  -- [ H ] PESTAÑAS (Bufferline para ver los archivos abiertos)
   {
     "akinsho/bufferline.nvim",
     version = "*",
@@ -195,6 +193,8 @@ require("lazy").setup({
       vim.keymap.set('n', '<leader>x', '<Cmd>bdelete<CR>', { desc = "Cerrar pestaña actual" })
     end
   }
+
+})
 
 -- ==========================================
 -- 4. REGLAS ABSOLUTAS (Sobrescribir estándares)
