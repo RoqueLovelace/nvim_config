@@ -170,3 +170,16 @@ require("lazy").setup({
   }
 
 })
+
+-- ==========================================
+-- 4. REGLAS ABSOLUTAS (Sobrescribir estándares)
+-- ==========================================
+-- Esto fuerza 2 espacios en TODOS los lenguajes, ignorando sus reglas por defecto
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "*",
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.expandtab = true
+  end,
+})
