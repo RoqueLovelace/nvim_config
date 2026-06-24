@@ -53,7 +53,7 @@ require("lazy").setup({
   },
   -- [ C ] TELESCOPE (Buscador)
   {
-    'nvim-telescope/telescope.nvim', tag = '0.1.5',
+    'nvim-telescope/telescope.nvim', branch = 'master',
     dependencies = { 'nvim-lua/plenary.nvim' },
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Buscar Archivos" },
