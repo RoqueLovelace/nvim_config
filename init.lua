@@ -190,7 +190,7 @@ require("lazy").setup({
       -- <S-l> significa Shift + l (Moverse a la derecha)
       vim.keymap.set('n', '<S-h>', '<Cmd>BufferLineCyclePrev<CR>', { desc = "Pestaña anterior" })
       vim.keymap.set('n', '<S-l>', '<Cmd>BufferLineCycleNext<CR>', { desc = "Pestaña siguiente" })
-      vim.keymap.set('n', '<leader>x', '<Cmd>bdelete<CR>', { desc = "Cerrar pestaña actual" })
+      -- vim.keymap.set('n', '<leader>x', '<Cmd>bdelete<CR>', { desc = "Cerrar pestaña actual" })
     end
   },
   
@@ -208,6 +208,14 @@ require("lazy").setup({
           section_separators = { left = '', right = ''},
         },
       })
+    end
+  },
+
+  -- [ J ] CERRAR PESTAÑAS SIN ROMPER EL ÁRBOL
+  {
+    "famiu/bufdelete.nvim",
+    config = function()
+      vim.keymap.set('n', '<leader>x', '<Cmd>Bdelete<CR>', { desc = "Cerrar pestaña segura" })
     end
   }
 
