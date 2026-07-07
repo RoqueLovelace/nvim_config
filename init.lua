@@ -1,17 +1,13 @@
--- ==========================================
--- 1. CONFIGURACIÓN BASE Y TECLA LÍDER
--- ==========================================
+-- Base settings
 vim.g.mapleader = " "
-vim.opt.clipboard = "unnamedplus" -- Sincronizar el portapapeles de Neovim con Windows
+vim.opt.clipboard = "unnamedplus" -- sync with system clipboard
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.tabstop = 2         -- El ancho visual de un tabulador ahora es de 2 espacios
-vim.opt.shiftwidth = 2      -- El ancho de la sangría (indentación) cambia a 2 espacios
-vim.opt.expandtab = true    -- Transforma los tabs físicos en espacios reales
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
 
--- ==========================================
--- 2. INSTALADOR DEL GESTOR (lazy.nvim)
--- ==========================================
+-- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -22,20 +18,18 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- ==========================================
--- 3. PLUGINS (COMPATIBLES CON NVIM v0.12)
--- ==========================================
+-- Plugin setup
 require("lazy").setup({
 
-  -- [ A ] EL ÁRBOL DE CARPETAS
+  -- 1. nvim-tree
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {}, 
-    keys = { { "<leader>e", ":NvimTreeToggle<CR>", desc = "Explorador" } }
+    keys = { { "<leader>e", ":NvimTreeToggle<CR>", desc = "Toggle explorer" } }
   },
 
--- [ B ] TREESITTER (Ahora con Python y Docker)
+  -- 2. treesitter
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
@@ -45,80 +39,81 @@ require("lazy").setup({
       if not status_ok then return end
 
       treesitter.setup({
-        -- Añadimos python y dockerfile a la lista de descargas
         ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "python", "dockerfile" }, 
         highlight = { enable = true },
       })
     end
   },
-  -- [ C ] TELESCOPE (Buscador)
+
+  -- 3. telescope
   {
     'nvim-telescope/telescope.nvim', branch = 'master',
     dependencies = { 'nvim-lua/plenary.nvim' },
     keys = {
-      { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Buscar Archivos" },
-      { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Buscar Texto" }
+      { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Find files" },
+      { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live grep" }
     }
   },
 
--- [ D ] MASON Y LSP (Sintaxis nativa Neovim 0.12+)
+  -- 4. bufferline
+  {
+    "akinsho/bufferline.nvim",
+    version = "*",
+    dependencies = "nvim-tree/nvim-web-devicons",
+    config = function()
+      require("bufferline").setup({
+        options = {
+          separator_style = "slant",
+          diagnostics = "nvim_lsp", 
+          show_buffer_close_icons = false,
+          show_close_icon = false,
+        }
+      })
+
+      -- Tab navigation
+      vim.keymap.set('n', '<S-h>', '<Cmd>BufferLineCyclePrev<CR>', { desc = "Prev buffer" })
+      vim.keymap.set('n', '<S-l>', '<Cmd>BufferLineCycleNext<CR>', { desc = "Next buffer" })
+    end
+  },
+
+  -- 5. bufdelete
+  {
+    "famiu/bufdelete.nvim",
+    config = function()
+      vim.keymap.set('n', '<leader>x', '<Cmd>Bdelete<CR>', { desc = "Close buffer safely" })
+    end
+  },
+
+  -- 6. mason & lspconfig
   {
     "neovim/nvim-lspconfig",
     dependencies = { "williamboman/mason.nvim" },
     config = function()
       require("mason").setup()
       
-      -- Nueva API de Neovim para activar los servidores sin usar require('lspconfig')
+      -- Native LSP setup (Neovim 0.12+)
       vim.lsp.config.pyright = {}
       vim.lsp.enable('pyright')
       
       vim.lsp.config.dockerls = {}
       vim.lsp.enable('dockerls')
 
-      -- Atajos de teclado
-      vim.keymap.set('n', 'K', vim.lsp.buf.hover, { desc = "Analizar documentación" })
-      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = "Rastrear definición" })
-      vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, { desc = "Renombrar variable" })
-      -- Atajo para ver el mensaje de error o advertencia flotante
-      vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = "Ver diagnóstico/error" })
-    end
-  },
-  -- [ E ] MODO ZEN
-  {
-    "folke/zen-mode.nvim",
-    keys = { { "<leader>z", ":ZenMode<CR>", desc = "Modo Zen" } }
-  },
-
--- [ F ] TEMA VISUAL (Con lógica de Servidor/Local)
-  {
-    "folke/tokyonight.nvim",
-    priority = 1000, 
-    config = function()
-      -- Detecta si estamos conectados por SSH
-      local is_ssh = vim.env.SSH_CLIENT ~= nil or vim.env.SSH_TTY ~= nil
-      
-      -- Si NO estamos en SSH, activamos la transparencia
-      local use_transparent = not is_ssh
-
-      require("tokyonight").setup({
-        transparent = use_transparent, 
-        styles = {
-          sidebars = use_transparent and "transparent" or "dark",
-          floats = use_transparent and "transparent" or "dark",
-        },
-      })
-      vim.cmd.colorscheme("tokyonight-moon") 
+      -- LSP keymaps
+      vim.keymap.set('n', 'K', vim.lsp.buf.hover, { desc = "Hover documentation" })
+      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = "Go to definition" })
+      vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, { desc = "Rename symbol" })
+      vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = "Line diagnostics" })
     end
   },
 
-  -- [ G ] AUTOCOMPLETADO (El menú desplegable inteligente)
+  -- 7. nvim-cmp
   {
     "hrsh7th/nvim-cmp",
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp", -- Conecta la inteligencia del LSP con el menú
-      "hrsh7th/cmp-buffer",   -- Sugiere palabras que ya escribiste en el archivo
-      "hrsh7th/cmp-path",     -- Sugiere rutas de archivos (ej. al escribir "./")
-      "L3MON4D3/LuaSnip",     -- Motor para expandir fragmentos de código (necesario)
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",  
+      "hrsh7th/cmp-path",    
+      "L3MON4D3/LuaSnip",    
       "saadparwaiz1/cmp_luasnip",
     },
     config = function()
@@ -136,11 +131,11 @@ require("lazy").setup({
           documentation = cmp.config.window.bordered(),
         },
         mapping = cmp.mapping.preset.insert({
-          ['<C-Space>'] = cmp.mapping.complete(), -- Forzar abrir el menú manualmente
-          ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Enter para aceptar sugerencia
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }),
           ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
-              cmp.select_next_item() -- Bajar en la lista con Tab
+              cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
               luasnip.expand_or_jump()
             else
@@ -149,7 +144,7 @@ require("lazy").setup({
           end, { "i", "s" }),
           ['<S-Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
-              cmp.select_prev_item() -- Subir en la lista con Shift + Tab
+              cmp.select_prev_item()
             elseif luasnip.jumpable(-1) then
               luasnip.jump(-1)
             else
@@ -157,53 +152,46 @@ require("lazy").setup({
             end
           end, { "i", "s" }),
         }),
-        -- El orden de las "sources" define la prioridad de lo que te recomienda
+        -- Source priority
         sources = cmp.config.sources({
-          { name = 'nvim_lsp' }, -- 1. Sugerencias lógicas de Pyright/Dockerls
-          { name = 'luasnip' },  -- 2. Fragmentos de código
+          { name = 'nvim_lsp' },
+          { name = 'luasnip' }, 
         }, {
-          { name = 'buffer' },   -- 3. Palabras de este mismo archivo
-          { name = 'path' },     -- 4. Rutas de tu disco duro
+          { name = 'buffer' },  
+          { name = 'path' },    
         })
       })
     end
   },
 
-  -- [ H ] PESTAÑAS (Bufferline para ver los archivos abiertos)
+  -- 8. tokyonight
   {
-    "akinsho/bufferline.nvim",
-    version = "*",
-    dependencies = "nvim-tree/nvim-web-devicons",
+    "folke/tokyonight.nvim",
+    priority = 1000, 
     config = function()
-      require("bufferline").setup({
-        options = {
-          -- Estilo visual de las pestañas
-          separator_style = "slant", -- Pone los bordes inclinados tipo navegador moderno
-          diagnostics = "nvim_lsp",  -- Muestra un iconito rojo en la pestaña si ese archivo tiene un error
-          show_buffer_close_icons = false,
-          show_close_icon = false,
-        }
-      })
+      -- Disable transparency for SSH sessions
+      local is_ssh = vim.env.SSH_CLIENT ~= nil or vim.env.SSH_TTY ~= nil
+      local use_transparent = not is_ssh
 
-      -- Atajos de teclado para navegar entre pestañas
-      -- <S-h> significa Shift + h (Moverse a la izquierda)
-      -- <S-l> significa Shift + l (Moverse a la derecha)
-      vim.keymap.set('n', '<S-h>', '<Cmd>BufferLineCyclePrev<CR>', { desc = "Pestaña anterior" })
-      vim.keymap.set('n', '<S-l>', '<Cmd>BufferLineCycleNext<CR>', { desc = "Pestaña siguiente" })
-      -- vim.keymap.set('n', '<leader>x', '<Cmd>bdelete<CR>', { desc = "Cerrar pestaña actual" })
+      require("tokyonight").setup({
+        transparent = use_transparent, 
+        styles = {
+          sidebars = use_transparent and "transparent" or "dark",
+          floats = use_transparent and "transparent" or "dark",
+        },
+      })
+      vim.cmd.colorscheme("tokyonight-moon") 
     end
   },
-  
-  -- [ I ] BARRA DE ESTADO (Para ver Git, modos y líneas)
+
+  -- 9. lualine
   {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("lualine").setup({
         options = {
-          -- Le decimos que use los colores de tu tema actual
           theme = "tokyonight", 
-          -- Estilos de los separadores
           component_separators = { left = '│', right = '│'},
           section_separators = { left = '', right = ''},
         },
@@ -211,20 +199,15 @@ require("lazy").setup({
     end
   },
 
-  -- [ J ] CERRAR PESTAÑAS SIN ROMPER EL ÁRBOL
+  -- 10. zen-mode
   {
-    "famiu/bufdelete.nvim",
-    config = function()
-      vim.keymap.set('n', '<leader>x', '<Cmd>Bdelete<CR>', { desc = "Cerrar pestaña segura" })
-    end
+    "folke/zen-mode.nvim",
+    keys = { { "<leader>z", ":ZenMode<CR>", desc = "Toggle Zen mode" } }
   }
 
 })
 
--- ==========================================
--- 4. REGLAS ABSOLUTAS (Sobrescribir estándares)
--- ==========================================
--- Esto fuerza 2 espacios en TODOS los lenguajes, ignorando sus reglas por defecto
+-- Global formatting overrides
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "*",
   callback = function()
